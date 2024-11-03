@@ -1,0 +1,17 @@
+`npm run build`
+1. Deploy with Vercel:
+- Vercel CLI
+  - With Install vercel:
+    - `npm install -g vercel`
+    - `vercel -v`
+    - `vercel login`
+    - `vercel --prod`
+
+  - without install:
+    - `npx vercel login`
+    - `npx vercel --prod`
+  
+  - Output:
+    - It'll give me an inspect link (From where i can setup rest of project like environment)
+
+- GitHub

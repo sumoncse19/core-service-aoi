@@ -1,0 +1,394 @@
+Here’s a polished and professional version of your README to make it visually appealing and standardized:
+
+---
+
+# **Pulikids - Childcare Management Platform**
+
+Pulikids is an innovative childcare management platform tailored for nurseries, schools, and childcare providers across the UK. The platform offers streamlined management for bookings, activity tracking, compliance, and communication with parents.
+
+---
+
+## **Table of Contents**
+
+1. [Project Overview](#project-overview)
+2. [Technical Stack](#technical-stack)
+3. [Project Requirements](#project-requirements)
+   - [Technical Requirements](#technical-requirements)
+   - [Architecture Requirements](#architecture-requirements)
+4. [Package Dependencies](#package-dependencies)
+   - [Core Dependencies](#core-dependencies)
+   - [Development Dependencies](#development-dependencies)
+5. [Key Services](#key-services)
+   - [User Service](#1-user-service)
+   - [Tracking Service](#2-tracking-service)
+   - [Child Service](#3-child-service)
+6. [Common Components](#common-components)
+7. [Session Management](#session-management)
+8. [Database Schema](#database-schema)
+9. [Getting Started](#getting-started)
+10. [Scripts](#scripts)
+11. [Contributing](#contributing)
+12. [License](#license)
+
+---
+
+## **Project Overview**
+
+Pulikids provides childcare providers with powerful tools for managing activities, ensuring compliance, and staying connected with parents. Designed with scalability and flexibility in mind, Pulikids is adaptable to various childcare environments.
+
+---
+
+## **Technical Stack**
+
+- **Backend**: Node.js with TypeScript
+- **Databases**:
+  - **PostgreSQL** for structured data
+  - **MongoDB** for flexible document storage
+- **Authentication**: Clerk
+- **Validation**: Zod
+- **ORM/ODM**:
+  - TypeORM for PostgreSQL
+  - Mongoose for MongoDB
+- **API Documentation**: Swagger
+- **Email Service**: Nodemailer
+
+---
+
+## **Project Requirements**
+
+### **Technical Requirements**
+
+- Implementation in **Node.js** and **TypeScript**
+- Dual database architecture
+- Schema validation using **Zod**
+- **Clerk** for authentication
+- Optional Docker support
+- Optional Redis for API Gateway
+
+### **Architecture Requirements**
+
+- **MVC** (Model-View-Controller) pattern
+- Robust error handling and input validation
+- **API Documentation**
+- Security best practices
+
+### **API Documentation Link**
+
+For detailed API documentation, visit [Swagger UI](http://localhost:5000/api-docs).
+
+---
+
+## **Package Dependencies**
+
+### **Core Dependencies**
+
+- `@clerk/backend` & `@clerk/express` - Authentication and user management
+- `typeorm` & `mongoose` - Database ORMs
+- `zod` - Schema validation
+- `nodemailer` - Email services
+
+### **Development Dependencies**
+
+- `typescript` - TypeScript compiler
+- `eslint` & `prettier` - Code quality and formatting
+- `husky` & `lint-staged` - Git hooks and staged file linting
+
+---
+
+## **Key Services**
+
+### **1. User Service**
+
+Handles user authentication and management with key functionalities:
+
+- **User Registration** and **Login**
+- Role-based Access Control
+- Session Management
+- Password Reset
+
+#### **API Endpoints**
+
+- **Register User**  
+  `POST /api/v1/users/register`
+
+  **Postman Example:**
+
+  ```json
+  {
+    "first_name": "John",
+    "last_name": "Doe",
+    "email": "johndoe@gmail.com",
+    "password": "xK9#mP2$vL5nQ8",
+    "role": "admin", // parent | admin | staff
+    "user_name": "johndoe"
+  }
+  ```
+
+- **Login**  
+  `POST /api/v1/users/login`
+
+  **Postman Example:**
+
+  ```json
+  {
+    "email": "johndoe@gmail.com",
+    "password": "xK9#mP2$vL5nQ8"
+  }
+  ```
+
+- **Reset Password Request**  
+  `POST /api/v1/users/reset-password-request`
+
+  **Postman Example:**
+
+  ```json
+  {
+    "email": "user@example.com"
+  }
+  ```
+
+- **Reset Password**  
+  `POST /api/v1/users/reset-password`
+
+  **Postman Example:**
+
+  ```json
+  {
+    "email": "user@example.com",
+    "otp": "123456", // OTP from email
+    "newPassword": "NewSecurePass123!"
+  }
+  ```
+
+- **Logout**  
+  `POST /api/v1/users/logout`
+
+  **Postman Example:**
+
+  ```json
+  {
+    "token": "user-session-token"
+  }
+  ```
+
+- **Get Profile**  
+  `GET /api/v1/users/profile`
+
+### **2. Tracking Service**
+
+Tracks and manages activities and attendance:
+
+- **Activity CRUD** Operations
+- Scheduling and Capacity Management
+- Attendance Status Updates
+- Reporting System
+
+#### **API Endpoints**
+
+- **Create Activity**  
+  `POST /api/v1/tracking/activities`
+
+  **Postman Example:**
+
+  ```json
+  {
+    "title": "Morning Yoga Session 2",
+    "description": "Morning yoga session for kids aged 5-7",
+    "start_time": "2024-03-20T09:00:00Z",
+    "end_time": "2024-03-20T10:00:00Z",
+    "assigned_staff": [
+      "ca3cea30-2a96-40bb-9112-a901bfed2b0c", // staff(user) id
+      "01a0a0eb-b056-4cf3-b975-33d1cad65a46"
+    ],
+    "max_participants": 15,
+    "location": "Main Activity Room",
+    "metadata": {
+      "equipment_needed": ["yoga mats", "blocks"],
+      "age_group": "5-7 years",
+      "difficulty_level": "beginner"
+    }
+  }
+  ```
+
+- **Get Activities**  
+  `GET /api/v1/tracking/activities`
+
+- **Get Activity by ID**  
+  `GET /api/v1/tracking/activities/:id`
+
+- **Update Activity**  
+  `PATCH /api/v1/tracking/activities/:id`
+
+- **Delete Activity**  
+  `DELETE /api/v1/tracking/activities/:id`
+
+- **Record Attendance**  
+  `POST /api/v1/tracking/attendance`
+
+  **Postman Example:**
+
+  ```json
+  {
+    "activity_id": "e28608cf-28c1-4f52-80e5-9d010b813a02",
+    "child_id": "2bdba8b7-5bb5-4f79-adea-d5a9fdc4a919", // For this child id we have child service.
+    "status": "present",
+    "check_in_time": "2024-11-03T18:00:00.000Z",
+    "check_out_time": "2024-11-04T18:00:00.000Z",
+    "notes": "Participated enthusiastically"
+  }
+  ```
+
+- **Get Attendance by Activity**  
+  `GET /api/v1/tracking/attendance/activity/:activityId`
+
+- **Update Attendance**  
+  `PATCH /api/v1/tracking/attendance/:id`
+
+- **Get Activity Report**  
+  `GET /api/v1/tracking/reports/activity/:activityId`
+
+- **Get Daily Report**  
+  `GET /api/v1/tracking/reports/daily`
+
+### **3. Child Service**
+
+Manages child profiles and parent relationships:
+
+- **Profile Management**
+- Medical Information
+- Activity Tracking
+
+#### **API Endpoints**
+
+- **Register Child**  
+  `POST /api/v1/children/register`
+
+  **Postman Example:**
+
+  ```json
+  {
+    "first_name": "Abdur",
+    "last_name": "Rahim",
+    "date_of_birth": "2016-05-15",
+    "gender": "male", // male | female
+    "medical_info": "No allergies",
+    "emergency_contact": {
+      "name": "parent_name",
+      "phone": "1234567890",
+      "relationship": "Mother"
+    }
+  }
+  ```
+
+- **Get My Children**  
+  `GET /api/v1/children/my-children`
+
+- **Update Child**  
+  `PATCH /api/v1/children/:id`
+
+- **Delete Child**  
+  `DELETE /api/v1/children/:id`
+
+---
+
+## **Common Components**
+
+### **Middleware**
+
+1. **Auth Middleware**  
+   Handles session validation, role-based access, and token verification.
+
+2. **Request Validation**  
+   Utilizes Zod for schema validation and sanitization.
+
+### **Error Handling**
+
+Centralized error handling with development and production configurations.
+
+### **Utilities**
+
+- **Async Handler** - Wraps controllers for error management.
+- **OTP Generator** - Generates secure OTPs.
+- **Date/Time Utilities** - Functions for date and time manipulation.
+
+---
+
+## **Session Management**
+
+- **JWT-based** authentication
+- Sessions stored in MongoDB
+- Auto-logout on inactivity
+
+---
+
+## **Database Schema**
+
+### **PostgreSQL Tables**
+
+- **users** - Authentication and profile data
+- **activities** - Activity and scheduling details
+- **attendance** - Attendance tracking
+- **children** - Child profile information
+
+### **MongoDB Collections**
+
+- **activities** - Metadata and updates
+- **attendance** - History and notes
+
+---
+
+## **Getting Started**
+
+1. **Clone the Repository**
+
+   ```bash
+   git clone [repository-url]
+   ```
+
+2. **Install Dependencies**
+
+   ```bash
+   yarn install
+   ```
+
+3. **Set Up Environment Variables**  
+   Configure `.env` file with necessary variables (PostgreSQL, MongoDB, Clerk keys, etc.).
+
+4. **Database Setup**
+
+   ```bash
+   yarn migration:generate
+   yarn migration:run
+   ```
+
+5. **Start Development Server**
+   ```bash
+   yarn start:dev
+   ```
+
+---
+
+## **Scripts**
+
+- **`yarn start:dev`** - Run development server
+- **`yarn build`** - Build production-ready code
+- **`yarn lint`** - Run ESLint
+- **`yarn prettier`** - Format code
+- **`yarn migration:generate`** - Generate TypeORM migrations
+- **`yarn migration:run`** - Execute migrations
+
+---
+
+## **Contributing**
+
+We welcome contributions! Please follow our [Contribution Guidelines](CONTRIBUTING.md) for more details.
+
+---
+
+## **License**
+
+Pulikids is licensed under the **MIT License**.
+
+---
+
+This README should give your project a professional and organized presentation, making it appealing to contributors and team members alike. Let me know if you'd like further adjustments!
