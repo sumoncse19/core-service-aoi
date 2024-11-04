@@ -236,4 +236,104 @@ export class ChildController {
       message: 'Child deleted successfully',
     })
   })
+
+  /**
+   * @swagger
+   * /children/{id}/activity-history:
+   *   get:
+   *     summary: Get child's activity history
+   *     tags: [Children]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: The child ID
+   *     responses:
+   *       200:
+   *         description: Child's activity history
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 bookings:
+   *                   type: array
+   *                   items:
+   *                     $ref: '#/components/schemas/Booking'
+   *                 attendance:
+   *                   type: array
+   *                   items:
+   *                     $ref: '#/components/schemas/Attendance'
+   *                 statistics:
+   *                   type: object
+   *                   properties:
+   *                     totalSessions:
+   *                       type: number
+   *                     statuses:
+   *                       type: object
+   *       404:
+   *         description: Child not found
+   */
+  getChildActivityHistory = catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthRequest
+    if (!authReq.auth?.userId) {
+      throw new AppError(401, 'Authentication required')
+    }
+
+    const history = await this.childService.getChildActivityHistory(
+      req.params.id,
+    )
+
+    res.status(200).json({
+      success: true,
+      data: history,
+    })
+  })
+
+  /**
+   * @swagger
+   * /children/{id}/eligible-activities:
+   *   get:
+   *     summary: Get activities eligible for the child
+   *     tags: [Children]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: The child ID
+   *     responses:
+   *       200:
+   *         description: List of eligible activities
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items:
+   *                 $ref: '#/components/schemas/Activity'
+   *       404:
+   *         description: Child not found
+   */
+  getEligibleActivities = catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthRequest
+    if (!authReq.auth?.userId) {
+      throw new AppError(401, 'Authentication required')
+    }
+
+    const activities = await this.childService.getEligibleActivities(
+      req.params.id,
+    )
+
+    res.status(200).json({
+      success: true,
+      data: activities,
+    })
+  })
 }

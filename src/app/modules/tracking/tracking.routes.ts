@@ -74,6 +74,33 @@ router.patch(
   trackingController.updateAttendance,
 )
 
+router.post(
+  '/attendance/bulk',
+  validateSession as unknown as RequestHandler,
+  requireRole([UserRole.ADMIN, UserRole.STAFF]) as unknown as RequestHandler,
+  trackingController.recordBulkAttendance,
+)
+
+router.get(
+  '/activities/upcoming',
+  validateSession as unknown as RequestHandler,
+  trackingController.getUpcomingActivities,
+)
+
+router.get(
+  '/reports/weekly',
+  validateSession as unknown as RequestHandler,
+  requireRole([UserRole.ADMIN, UserRole.STAFF]) as unknown as RequestHandler,
+  trackingController.getWeeklyReport,
+)
+
+router.get(
+  '/reports/monthly',
+  validateSession as unknown as RequestHandler,
+  requireRole([UserRole.ADMIN, UserRole.STAFF]) as unknown as RequestHandler,
+  trackingController.getMonthlyReport,
+)
+
 // Reports routes
 router.get(
   '/reports/activity/:activityId',

@@ -397,4 +397,131 @@ export class TrackingController {
       data: attendance,
     })
   })
+
+  /**
+   * @swagger
+   * /tracking/attendance/bulk:
+   *   post:
+   *     summary: Record attendance for multiple children
+   *     tags: [Attendance]
+   *     security:
+   *       - bearerAuth: []
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               activity_id:
+   *                 type: string
+   *               attendances:
+   *                 type: array
+   *                 items:
+   *                   type: object
+   *                   properties:
+   *                     child_id:
+   *                       type: string
+   *                     status:
+   *                       type: string
+   *                       enum: [present, absent, late, excused]
+   */
+  recordBulkAttendance = catchAsync(async (req: Request, res: Response) => {
+    const { activity_id, attendances } = req.body
+    const result = await this.trackingService.recordBulkAttendance(
+      activity_id,
+      attendances,
+    )
+
+    res.status(201).json({
+      success: true,
+      data: result,
+    })
+  })
+
+  /**
+   * @swagger
+   * /tracking/activities/upcoming:
+   *   get:
+   *     summary: Get upcoming activities
+   *     tags: [Activities]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: query
+   *         name: days
+   *         schema:
+   *           type: number
+   *         description: Number of days to look ahead (default: 7)
+   */
+  getUpcomingActivities = catchAsync(async (req: Request, res: Response) => {
+    const days = req.query.days ? parseInt(req.query.days as string) : 7
+    const activities = await this.trackingService.getUpcomingActivities(days)
+
+    res.status(200).json({
+      success: true,
+      data: activities,
+    })
+  })
+
+  /**
+   * @swagger
+   * /tracking/reports/weekly:
+   *   get:
+   *     summary: Get weekly activity report
+   *     tags: [Reports]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: query
+   *         name: startDate
+   *         schema:
+   *           type: string
+   *           format: date
+   *         description: Start date of the week
+   */
+  getWeeklyReport = catchAsync(async (req: Request, res: Response) => {
+    const startDate = req.query.startDate
+      ? new Date(req.query.startDate as string)
+      : new Date()
+    const report = await this.trackingService.getWeeklyReport(startDate)
+
+    res.status(200).json({
+      success: true,
+      data: report,
+    })
+  })
+
+  /**
+   * @swagger
+   * /tracking/reports/monthly:
+   *   get:
+   *     summary: Get monthly activity report
+   *     tags: [Reports]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: query
+   *         name: year
+   *         required: true
+   *         schema:
+   *           type: number
+   *       - in: query
+   *         name: month
+   *         required: true
+   *         schema:
+   *           type: number
+   */
+  getMonthlyReport = catchAsync(async (req: Request, res: Response) => {
+    const { year, month } = req.query
+    const report = await this.trackingService.getMonthlyReport(
+      parseInt(year as string),
+      parseInt(month as string),
+    )
+
+    res.status(200).json({
+      success: true,
+      data: report,
+    })
+  })
 }

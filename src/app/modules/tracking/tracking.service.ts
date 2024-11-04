@@ -8,12 +8,16 @@ import { ActivityStatus } from '../shared/enumeration'
 import { UserEntity } from '../user/user.entity'
 import { UserRole } from '../shared/enumeration'
 import { ChildEntity } from '../child/child.entity'
+import { BookingEntity } from '../booking/booking.entity'
+import { BookingStatus } from '../shared/enumeration'
+import { AttendanceStatus } from '../shared/enumeration'
 
 export class TrackingService {
   private activityRepository: Repository<ActivityEntity>
   private attendanceRepository: Repository<AttendanceEntity>
   private userRepository: Repository<UserEntity>
   private childRepository: Repository<ChildEntity>
+  private bookingRepository: Repository<BookingEntity>
 
   constructor() {
     this.activityRepository = PostgresDataSource.getRepository(ActivityEntity)
@@ -21,6 +25,7 @@ export class TrackingService {
       PostgresDataSource.getRepository(AttendanceEntity)
     this.userRepository = PostgresDataSource.getRepository(UserEntity)
     this.childRepository = PostgresDataSource.getRepository(ChildEntity)
+    this.bookingRepository = PostgresDataSource.getRepository(BookingEntity)
   }
 
   private async validateStaffIds(staffIds: string[]) {
@@ -181,25 +186,6 @@ export class TrackingService {
     }
   }
 
-  private async validateChildId(childId: string, parentId?: string) {
-    const query = this.childRepository
-      .createQueryBuilder('child')
-      .where('child.id = :childId', { childId })
-      .andWhere('child.is_active = :isActive', { isActive: true })
-
-    if (parentId) {
-      query.andWhere('child.parent_id = :parentId', { parentId })
-    }
-
-    const child = await query.getOne()
-
-    if (!child) {
-      throw new AppError(404, 'Child not found or not authorized')
-    }
-
-    return child
-  }
-
   private async validateActivity(activityId: string) {
     const activity = await this.activityRepository.findOne({
       where: { id: activityId },
@@ -224,20 +210,35 @@ export class TrackingService {
     }
   }
 
-  async recordAttendance(attendanceData: IAttendance) {
+  async recordAttendance(attendanceData: IAttendance & { booking_id: string }) {
     try {
       await this.validateActivity(attendanceData.activity_id)
       await this.validateCapacity(attendanceData.activity_id)
 
-      // Verify child exists and is active
-      await this.validateChildId(attendanceData.child_id)
+      // Verify booking exists and is confirmed
+      const booking = await this.bookingRepository.findOne({
+        where: {
+          id: attendanceData.booking_id,
+          status: BookingStatus.CONFIRMED,
+        },
+      })
+
+      if (!booking) {
+        throw new AppError(404, 'Valid booking not found')
+      }
 
       // Save to PostgreSQL
-      const pgAttendance = this.attendanceRepository.create(attendanceData)
+      const pgAttendance = this.attendanceRepository.create({
+        ...attendanceData,
+        child_id: booking.child_id,
+      })
       await this.attendanceRepository.save(pgAttendance)
 
       // Save to MongoDB
-      const mongoAttendance = new AttendanceModel(attendanceData)
+      const mongoAttendance = new AttendanceModel({
+        ...attendanceData,
+        child_id: booking.child_id,
+      })
       await mongoAttendance.save()
 
       return pgAttendance
@@ -386,6 +387,22 @@ export class TrackingService {
     }
   }
 
+  // Helper method for attendance summary calculation
+  private calculateAttendanceSummary(attendance: AttendanceEntity[]) {
+    return attendance.reduce(
+      (acc, record) => {
+        acc[record.status]++
+        return acc
+      },
+      {
+        present: 0,
+        absent: 0,
+        late: 0,
+        excused: 0,
+      },
+    )
+  }
+
   async getWeeklyReport(startDate: Date) {
     try {
       const endDate = new Date(startDate)
@@ -464,22 +481,6 @@ export class TrackingService {
     }
   }
 
-  // Helper method for attendance summary calculation
-  private calculateAttendanceSummary(attendance: AttendanceEntity[]) {
-    return attendance.reduce(
-      (acc, record) => {
-        acc[record.status]++
-        return acc
-      },
-      {
-        present: 0,
-        absent: 0,
-        late: 0,
-        excused: 0,
-      },
-    )
-  }
-
   // Add activity scheduling features
   async getUpcomingActivities(days: number = 7) {
     try {
@@ -533,5 +534,63 @@ export class TrackingService {
       if (error instanceof AppError) throw error
       throw new AppError(400, 'Failed to record bulk attendance')
     }
+  }
+
+  // Add method to count confirmed bookings
+  private async getConfirmedBookingsCount(activityId: string): Promise<number> {
+    return await this.bookingRepository.count({
+      where: {
+        activity_id: activityId,
+        status: BookingStatus.CONFIRMED,
+      },
+    })
+  }
+
+  // Add method to create attendance record
+  private async createAttendanceRecord(
+    bookingId: string,
+    activityId: string,
+  ): Promise<AttendanceEntity> {
+    const booking = await this.bookingRepository.findOne({
+      where: { id: bookingId },
+    })
+
+    if (!booking) {
+      throw new AppError(404, 'Booking not found')
+    }
+
+    const attendanceData: IAttendance = {
+      activity_id: activityId,
+      child_id: booking.child_id,
+      status: AttendanceStatus.ABSENT, // Default status
+      recorded_by: booking.created_by,
+    }
+
+    const attendance = this.attendanceRepository.create(attendanceData)
+    await this.attendanceRepository.save(attendance)
+
+    return attendance
+  }
+
+  // Add method to handle booking confirmations
+  async handleBookingConfirmation(bookingId: string, activityId: string) {
+    const activity = await this.activityRepository.findOne({
+      where: { id: activityId },
+    })
+
+    if (!activity) {
+      throw new AppError(404, 'Activity not found')
+    }
+
+    // Update activity capacity
+    if (activity.max_participants) {
+      const currentBookings = await this.getConfirmedBookingsCount(activityId)
+      if (currentBookings >= activity.max_participants) {
+        throw new AppError(400, 'Activity is fully booked')
+      }
+    }
+
+    // Create placeholder attendance record
+    await this.createAttendanceRecord(bookingId, activityId)
   }
 }

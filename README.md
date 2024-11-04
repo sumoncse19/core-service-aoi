@@ -1,7 +1,3 @@
-Here’s a polished and professional version of your README to make it visually appealing and standardized:
-
----
-
 # **Pulikids - Childcare Management Platform**
 
 Pulikids is an innovative childcare management platform tailored for nurseries, schools, and childcare providers across the UK. The platform offers streamlined management for bookings, activity tracking, compliance, and communication with parents.
@@ -22,6 +18,7 @@ Pulikids is an innovative childcare management platform tailored for nurseries, 
    - [User Service](#1-user-service)
    - [Tracking Service](#2-tracking-service)
    - [Child Service](#3-child-service)
+   - [Booking Service](#4-booking-service)
 6. [Common Components](#common-components)
 7. [Session Management](#session-management)
 8. [Database Schema](#database-schema)
@@ -244,6 +241,18 @@ Tracks and manages activities and attendance:
 - **Update Attendance**  
   `PATCH /api/v1/tracking/attendance/:id`
 
+- **Record Bulk Attendance**  
+  `POST /api/v1/tracking/attendance/bulk`
+
+- **Get Upcoming Activities**  
+  `GET /api/v1/tracking/activities/upcoming`
+
+- **Get Weekly Report**  
+  `GET /api/v1/tracking/reports/weekly`
+
+- **Get Monthly Report**  
+  `GET /api/v1/tracking/reports/monthly`
+
 - **Get Activity Report**  
   `GET /api/v1/tracking/reports/activity/:activityId`
 
@@ -288,6 +297,99 @@ Manages child profiles and parent relationships:
 
 - **Delete Child**  
   `DELETE /api/v1/children/:id`
+
+- **Get Child Activity History**  
+  `GET /api/v1/children/:id/activity-history`
+
+- **Get Eligible Activities**  
+  `GET /api/v1/children/:id/eligible-activities`
+
+### **4. Booking Service**
+
+Manages bookings, availability, and payments:
+
+- **Booking Management**
+- Availability Checking
+- Booking Confirmation
+- Payment Processing
+
+#### **API Endpoints**
+
+- **Create Booking**  
+  `POST /api/v1/booking/bookings`
+
+  **Postman Example:**
+
+  ```json
+  {
+    "child_id": "child-uuid",
+    "activity_id": "activity-uuid",
+    "start_date": "2024-03-20T10:00:00Z",
+    "end_date": "2024-03-20T11:00:00Z",
+    "notes": "First time attending"
+  }
+  ```
+
+- **Create Recurring Booking**  
+  `POST /api/v1/booking/bookings/recurring`
+
+  **Postman Example:**
+
+  ```json
+  {
+    "child_id": "child-uuid",
+    "activity_id": "activity-uuid",
+    "start_date": "2024-03-20T10:00:00Z",
+    "recurrence": {
+      "frequency": "weekly",
+      "until": "2024-06-20"
+    }
+  }
+  ```
+
+- **Get Bookings**  
+  `GET /api/v1/booking/bookings`
+
+- **Get Booking by ID**  
+  `GET /api/v1/booking/bookings/:id`
+
+- **Update Booking**  
+  `PATCH /api/v1/booking/bookings/:id`
+
+- **Delete Booking**  
+  `DELETE /api/v1/booking/bookings/:id`
+
+- **Create Payment**  
+  `POST /api/v1/booking/payments`
+
+  **Postman Example:**
+
+  ```json
+  {
+    "booking_id": "booking-uuid",
+    "amount": 50.0,
+    "payment_method": "credit_card",
+    "transaction_id": "txn_123456789"
+  }
+  ```
+
+- **Get Payments by Booking**  
+  `GET /api/v1/booking/payments/booking/:bookingId`
+
+- **Check Availability**  
+  `GET /api/v1/booking/availability`
+
+- **Confirm Booking**  
+  `POST /api/v1/booking/bookings/:id/confirm`
+
+- **Get Booking Confirmation Status**  
+  `GET /api/v1/booking/bookings/:id/confirmation-status`
+
+- **Get Booking Participation**  
+  `GET /api/v1/booking/bookings/:id/participation`
+
+- **Check Activity Eligibility**  
+  `GET /api/v1/booking/activities/:id/eligibility`
 
 ---
 
@@ -390,5 +492,3 @@ We welcome contributions! Please follow our [Contribution Guidelines](CONTRIBUTI
 Pulikids is licensed under the **MIT License**.
 
 ---
-
-This README should give your project a professional and organized presentation, making it appealing to contributors and team members alike. Let me know if you'd like further adjustments!
