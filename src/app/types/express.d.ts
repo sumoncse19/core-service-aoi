@@ -19,3 +19,30 @@ export type AuthRequestHandler<
   ReqBody = unknown,
   ReqQuery = ParsedQs,
 > = RequestHandler<P, ResBody, ReqBody, ReqQuery>
+
+/**
+ * import { Request } from 'express'
+import { ClerkUser } from '@clerk/clerk-sdk-node'
+import { RequestHandler } from 'express'
+import { ParamsDictionary } from 'express-serve-static-core'
+import { ParsedQs } from 'qs'
+
+export interface AuthRequest extends Request {
+  auth?: {
+    userId: string
+    role: string
+    user_name: string
+    name?: string
+    email?: string
+  }
+  user?: ClerkUser
+}
+
+export type AuthRequestHandler<
+  P = ParamsDictionary,
+  ResBody = unknown,
+  ReqBody = unknown,
+  ReqQuery = ParsedQs,
+> = RequestHandler<P, ResBody, ReqBody, ReqQuery>
+
+ */

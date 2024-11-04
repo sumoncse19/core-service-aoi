@@ -31,6 +31,15 @@ const options = {
         bearerAuth: [],
       },
     ],
+    tags: [
+      { name: 'Users', description: 'User management and authentication' },
+      { name: 'Children', description: 'Child profile management' },
+      { name: 'Activities', description: 'Activity management' },
+      { name: 'Attendance', description: 'Attendance tracking' },
+      { name: 'Reports', description: 'Reporting system' },
+      { name: 'Bookings', description: 'Booking management' },
+      { name: 'Payments', description: 'Payment processing' },
+    ],
   },
   apis: ['./src/app/modules/**/*.ts'], // Ensure this path includes all your route files
 }

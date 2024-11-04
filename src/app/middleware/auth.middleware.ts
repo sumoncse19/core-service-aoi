@@ -1,9 +1,9 @@
 import { Response, NextFunction } from 'express'
-import { AuthRequest } from '../types/express'
 import { clerk } from '../config/clerk'
 import AppError from '../modules/shared/errors/AppError'
 import { UserRole } from '../modules/shared/enumeration'
 import { SessionModel } from '../modules/session/session.model'
+import { AuthRequest } from '../types/express'
 
 export const validateSession = async (
   req: AuthRequest,
