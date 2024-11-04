@@ -15,3 +15,6 @@
     - It'll give me an inspect link (From where i can setup rest of project like environment)
 
 - GitHub
+
+
+"test": "echo \"Error: no test specified\" && exit 1",

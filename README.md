@@ -393,6 +393,215 @@ Manages bookings, availability, and payments:
 
 ---
 
+## **5. API Gateway**
+
+The API Gateway serves as the single entry point for all client requests, providing routing, load balancing, caching, and service discovery capabilities.
+
+### **1. Service Discovery**
+
+The service discovery mechanism allows dynamic registration and discovery of microservices.
+
+```typescript
+// Register a service
+await serviceRegistry.registerService({
+  id: 'user-service-1',
+  name: 'user-service',
+  url: 'http://localhost:3001',
+  status: 'active',
+  healthCheck: '/health',
+  version: '1.0.0',
+})
+```
+
+### **2. Request Routing**
+
+Routes requests to appropriate services based on URL patterns and service availability.
+
+```typescript
+// Route Configuration Example
+{
+  path: '/users/*',
+  service: 'user-service',
+  method: 'GET',
+  auth: true,
+  rateLimit: {
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100 // limit each IP to 100 requests per windowMs
+  }
+}
+```
+
+### **3. Load Balancing**
+
+Supports multiple load balancing strategies:
+
+- Round Robin
+- Least Connection
+- Random
+
+```typescript
+// Load Balancer Configuration
+{
+  strategy: 'round-robin',
+  healthCheck: {
+    enabled: true,
+    interval: 30000, // 30 seconds
+    timeout: 5000,   // 5 seconds
+    unhealthyThreshold: 3
+  }
+}
+```
+
+### **4. Cache Management**
+
+Redis-based caching system with configurable TTL and pattern-based invalidation.
+
+```typescript
+// Cache Configuration
+{
+  enabled: true,
+  ttl: 300, // 5 minutes
+  maxSize: 1000
+}
+```
+
+### **API Gateway Endpoints**
+
+#### Service Registry
+
+- `POST /registry/services` - Register a new service
+- `DELETE /registry/services/:id` - Deregister a service
+- `GET /registry/services` - List all registered services
+
+#### Health Checks
+
+- `GET /health` - Gateway health check
+- `GET /services/:service/health` - Service-specific health check
+
+#### Cache Management
+
+- `DELETE /cache/invalidate/:pattern` - Invalidate cache by pattern
+- `DELETE /cache/clear` - Clear entire cache
+
+### **Environment Variables**
+
+```env
+REDIS_HOST=localhost
+REDIS_PORT=6379
+GATEWAY_PORT=3000
+SERVICE_REGISTRY_TTL=30
+```
+
+### **Gateway Features**
+
+1. **Service Discovery**
+
+   - Dynamic service registration
+   - Health monitoring
+   - Automatic service deregistration
+   - Version management
+
+2. **Request Routing**
+
+   - Path-based routing
+   - Method-based routing
+   - Authentication middleware
+   - Rate limiting
+
+3. **Load Balancing**
+
+   - Multiple balancing strategies
+   - Health-check based routing
+   - Connection tracking
+   - Automatic failover
+
+4. **Cache Management**
+   - Redis-based caching
+   - Configurable TTL
+   - Pattern-based invalidation
+   - Automatic cache population
+
+### **Implementation Example**
+
+```typescript
+// Initialize Gateway
+const gateway = new ApiGateway({
+  port: 3000,
+  redis: {
+    host: 'localhost',
+    port: 6379,
+  },
+  loadBalancer: {
+    strategy: 'round-robin',
+    healthCheck: {
+      enabled: true,
+      interval: 30000,
+    },
+  },
+  cache: {
+    enabled: true,
+    ttl: 300,
+  },
+})
+
+// Start Gateway
+gateway.start()
+```
+
+### **Service Integration**
+
+Services need to implement:
+
+1. Health check endpoint (`/health`)
+2. Version information
+3. Service metadata
+
+Example health check response:
+
+```json
+{
+  "status": "healthy",
+  "version": "1.0.0",
+  "timestamp": "2024-03-20T10:00:00Z",
+  "metrics": {
+    "uptime": 3600,
+    "memory": {
+      "used": 100000000,
+      "total": 500000000
+    }
+  }
+}
+```
+
+### **Security Considerations**
+
+1. **Authentication**
+
+   - JWT validation
+   - Role-based access control
+   - Rate limiting per client
+
+2. **Service Communication**
+
+   - TLS encryption
+   - Service-to-service authentication
+   - Request signing
+
+3. **Monitoring**
+   - Request logging
+   - Error tracking
+   - Performance metrics
+
+### **Error Handling**
+
+The gateway implements comprehensive error handling:
+
+- Service unavailable (503)
+- Rate limit exceeded (429)
+- Authentication failed (401)
+- Authorization failed (403)
+- Bad gateway (502)
+
 ## **Common Components**
 
 ### **Middleware**
