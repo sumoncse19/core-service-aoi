@@ -27,9 +27,10 @@ sessionSchema.index({ expiresAt: 1 })
 // Drop the problematic index if it exists
 mongoose.connection.on('connected', async () => {
   try {
-    await mongoose.connection.db
-      .collection('sessions')
-      .dropIndex('clerkSessionId_1')
+    const db = mongoose.connection.db
+    if (db) {
+      await db.collection('sessions').dropIndex('clerkSessionId_1')
+    }
   } catch (error) {
     console.log(error)
     // Index might not exist, ignore error
