@@ -1,9 +1,9 @@
 import cors from 'cors'
-import express, { Application, Request, Response } from 'express'
+import express, { Application, Request, Response, Express } from 'express'
 import notFound from './app/middleware/notFound'
 import globalErrorHandler from './app/middleware/globalErrorHandler'
 import router from './app/routes'
-// import { setupSwagger } from './app/config/swaggerConfig'
+import { setupSwagger } from './app/config/swaggerConfig'
 
 const app: Application = express()
 
@@ -30,7 +30,7 @@ app.get('/', getAController)
 app.use('/api/v1', router)
 
 // Setup Swagger
-// setupSwagger(app as Express)
+setupSwagger(app as Express)
 
 // Global error handling
 app.use(globalErrorHandler)

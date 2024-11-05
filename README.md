@@ -11,21 +11,23 @@ Pulikids is an innovative childcare management platform tailored for nurseries, 
 3. [Project Requirements](#project-requirements)
    - [Technical Requirements](#technical-requirements)
    - [Architecture Requirements](#architecture-requirements)
-4. [Package Dependencies](#package-dependencies)
+4. [Getting Started](#getting-started)
+5. [Scripts](#scripts)
+6. [API Documentation Link](#api-documentation-link)
+7. [Folder Structure](#folder-structure)
+8. [Package Dependencies](#package-dependencies)
    - [Core Dependencies](#core-dependencies)
    - [Development Dependencies](#development-dependencies)
-5. [Key Services](#key-services)
+9. [Key Services](#key-services)
    - [User Service](#1-user-service)
    - [Tracking Service](#2-tracking-service)
    - [Child Service](#3-child-service)
    - [Booking Service](#4-booking-service)
-6. [Common Components](#common-components)
-7. [Session Management](#session-management)
-8. [Database Schema](#database-schema)
-9. [Getting Started](#getting-started)
-10. [Scripts](#scripts)
-11. [Contributing](#contributing)
-12. [License](#license)
+10. [Common Components](#common-components)
+11. [Session Management](#session-management)
+12. [Database Schema](#database-schema)
+13. [Contributing](#contributing)
+14. [License](#license)
 
 ---
 
@@ -69,9 +71,158 @@ Pulikids provides childcare providers with powerful tools for managing activitie
 - **API Documentation**
 - Security best practices
 
-### **API Documentation Link**
+---
+
+## **Getting Started**
+
+1. **Clone the Repository**
+
+   ```bash
+   git clone https://github.com/sumoncse19/core-service-aoi
+   ```
+
+2. **Install Dependencies**
+
+   ```bash
+   npm install or yarn install
+   ```
+
+3. **Set Up Environment**  
+   Configure `.env` file with necessary variables (PostgreSQL, MongoDB, Clerk keys, etc.).
+
+   **Prerequisites**
+
+   - Node.js (v14 or higher)
+   - PostgreSQL
+   - MongoDB
+   - Redis (for API Gateway)
+
+   ### **Environment Variables**
+
+   Required environment variables (from .env.example):
+
+   ````plaintext
+   # Server Configuration
+
+   NODE_ENV=development
+   PORT=5000
+   BCRYPT_SALT_ROUNDS=12
+   JWT_ACCESS_SECRET=node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+   JWT_REFRESH_SECRET=node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+   JWT_ACCESS_EXPIRES_IN=7d
+   JWT_REFRESH_EXPIRES_IN=15m
+
+   For create JWT_ACCESS_SECRET and JWT_REFRESH_SECRET run this command in terminal:
+
+   ```bash
+   node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+   ```
+
+   # Database Configuration
+
+   DB_HOST=localhost
+   DB_PORT=5432
+   DB_USERNAME=postgres
+   DB_PASSWORD=password
+   DB_NAME=pulikids
+
+   # MongoDB Configuration
+
+   MONGODB_URI=your_mongodb_uri
+
+   # Authentication - Clerk
+
+   CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
+   CLERK_SECRET_KEY=your_clerk_secret_key
+
+   # Redis Configuration
+
+   REDIS_URL=redis://localhost:6379
+   REDIS_HOST=localhost
+   REDIS_PORT=6379
+   GATEWAY_PORT=3000
+   SERVICE_REGISTRY_TTL=30
+
+   ````
+
+4. **Database Setup**
+
+   ```bash
+   # Generate TypeORM migrations
+   yarn migration:generate
+   or,
+   npm run migration:generate
+
+   # Run migrations
+   yarn migration:run
+   or,
+   npm run migration:run
+   ```
+
+5. **Start Development Server**
+
+   ```bash
+   # Start with hot-reload
+   yarn start:dev
+   or,
+   npm run start:dev
+
+   # Build and start production server
+   yarn build
+   yarn start:prod
+   or,
+   npm run build
+   npm run start:prod
+   ```
+
+---
+
+## **Scripts**
+
+- **`yarn start:dev` or `npm run start:dev`** - Run development server
+- **`yarn build` or `npm run build`** - Build production-ready code
+- **`yarn lint` or `npm run lint`** - Run ESLint
+- **`yarn prettier` or `npm run prettier`** - Format code
+- **`yarn migration:generate` or `npm run migration:generate`** - Generate TypeORM migrations
+- **`yarn migration:run` or `npm run migration:run`** - Execute migrations
+
+## **API Documentation Link**
 
 For detailed API documentation, visit [Swagger UI](http://localhost:5000/api-docs).
+
+---
+
+## **Folder Structure**
+
+```
+src/
+├── app/
+│   ├── config/                 # Application configuration
+│   │   ├── clerk.ts           # Clerk authentication config
+│   │   ├── database.ts        # Database connection config
+│   │   ├── env.validation.ts  # Environment validation
+│   │   └── index.ts
+│   ├── database/
+│   │   └── migrations/        # Database migrations
+│   ├── middleware/            # Express middleware
+│   │   ├── globalErrorHandler.ts
+│   │   ├── notFound.ts
+│   │   ├── requireAuth.ts
+│   │   └── validateRequest.ts
+│   ├── modules/               # Feature modules
+│   │   ├── booking/
+│   │   ├── child/
+│   │   ├── session/
+│   │   ├── shared/
+│   │   ├── tracking/
+│   │   └── user/
+│   ├── app.ts                 # Express app setup
+│   └── server.ts              # Server entry point
+├── .env
+├── .env.example
+├── package.json
+└── tsconfig.json
+```
 
 ---
 
@@ -483,15 +634,6 @@ Redis-based caching system with configurable TTL and pattern-based invalidation.
 - `DELETE /cache/invalidate/:pattern` - Invalidate cache by pattern
 - `DELETE /cache/clear` - Clear entire cache
 
-### **Environment Variables**
-
-```env
-REDIS_HOST=localhost
-REDIS_PORT=6379
-GATEWAY_PORT=3000
-SERVICE_REGISTRY_TTL=30
-```
-
 ### **Gateway Features**
 
 1. **Service Discovery**
@@ -648,45 +790,30 @@ Centralized error handling with development and production configurations.
 
 ---
 
-## **Getting Started**
+## **Available Scripts**
 
-1. **Clone the Repository**
+```bash
+# Development
+yarn start:dev         # Start development server
+yarn start:prod        # Start production server
+yarn build            # Build production code
 
-   ```bash
-   git clone [repository-url]
-   ```
+# Database
+yarn migration:generate  # Generate new migration
+yarn migration:run      # Run migrations
+yarn migration:revert   # Revert last migration
 
-2. **Install Dependencies**
+# Code Quality
+yarn lint             # Run ESLint
+yarn lint:fix         # Fix ESLint errors
+yarn prettier         # Run Prettier
+yarn prettier:fix     # Fix Prettier issues
 
-   ```bash
-   yarn install
-   ```
-
-3. **Set Up Environment Variables**  
-   Configure `.env` file with necessary variables (PostgreSQL, MongoDB, Clerk keys, etc.).
-
-4. **Database Setup**
-
-   ```bash
-   yarn migration:generate
-   yarn migration:run
-   ```
-
-5. **Start Development Server**
-   ```bash
-   yarn start:dev
-   ```
-
----
-
-## **Scripts**
-
-- **`yarn start:dev`** - Run development server
-- **`yarn build`** - Build production-ready code
-- **`yarn lint`** - Run ESLint
-- **`yarn prettier`** - Format code
-- **`yarn migration:generate`** - Generate TypeORM migrations
-- **`yarn migration:run`** - Execute migrations
+# Testing
+yarn test             # Run tests
+yarn test:gateway     # Run gateway tests
+yarn test:watch       # Run tests in watch mode
+```
 
 ---
 
@@ -699,5 +826,3 @@ We welcome contributions! Please follow our [Contribution Guidelines](CONTRIBUTI
 ## **License**
 
 Pulikids is licensed under the **MIT License**.
-
----
