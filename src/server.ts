@@ -3,7 +3,6 @@ import { createServer } from 'http'
 import { connectMongoDB, PostgresDataSource } from './app/config/database'
 import 'reflect-metadata'
 import app from './app'
-import { setupSwagger } from './app/config/swaggerConfig'
 
 const initializeDatabases = async () => {
   try {
@@ -20,9 +19,6 @@ async function main() {
   try {
     const server = createServer(app)
     await initializeDatabases()
-
-    // Setup Swagger
-    setupSwagger(app)
 
     server.listen(config.port, () => {
       console.log(`Server is running on port ${config.port}`)

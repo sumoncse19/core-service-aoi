@@ -7,7 +7,6 @@ import AppError from '../shared/errors/AppError'
 import { ActivityStatus } from '../shared/enumeration'
 import { UserEntity } from '../user/user.entity'
 import { UserRole } from '../shared/enumeration'
-import { ChildEntity } from '../child/child.entity'
 import { BookingEntity } from '../booking/booking.entity'
 import { BookingStatus } from '../shared/enumeration'
 import { AttendanceStatus } from '../shared/enumeration'
@@ -16,7 +15,6 @@ export class TrackingService {
   private activityRepository: Repository<ActivityEntity>
   private attendanceRepository: Repository<AttendanceEntity>
   private userRepository: Repository<UserEntity>
-  private childRepository: Repository<ChildEntity>
   private bookingRepository: Repository<BookingEntity>
 
   constructor() {
@@ -24,7 +22,6 @@ export class TrackingService {
     this.attendanceRepository =
       PostgresDataSource.getRepository(AttendanceEntity)
     this.userRepository = PostgresDataSource.getRepository(UserEntity)
-    this.childRepository = PostgresDataSource.getRepository(ChildEntity)
     this.bookingRepository = PostgresDataSource.getRepository(BookingEntity)
   }
 

@@ -17,7 +17,6 @@ import {
   IAvailability,
 } from './booking.interface'
 import { ActivityEntity } from '../tracking/tracking.entity'
-import { UserEntity } from '../user/user.entity'
 import { ChildEntity } from '../child/child.entity'
 import AppError from '../shared/errors/AppError'
 import {
@@ -46,7 +45,6 @@ export class BookingService {
   private paymentRepository: Repository<PaymentEntity>
   private confirmationRepository: Repository<BookingConfirmationEntity>
   private activityRepository: Repository<ActivityEntity>
-  private userRepository: Repository<UserEntity>
   private childRepository: Repository<ChildEntity>
   private trackingService: TrackingService
 
@@ -57,7 +55,6 @@ export class BookingService {
       BookingConfirmationEntity,
     )
     this.activityRepository = PostgresDataSource.getRepository(ActivityEntity)
-    this.userRepository = PostgresDataSource.getRepository(UserEntity)
     this.childRepository = PostgresDataSource.getRepository(ChildEntity)
     this.trackingService = new TrackingService()
   }

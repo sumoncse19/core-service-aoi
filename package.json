@@ -1,9 +1,9 @@
 {
   "name": "core-service-aoi",
   "version": "1.0.0",
-  "description": "mongoose starter pack with simple login system",
+  "description": "Pulikids - Childcare Management Platform",
   "main": "index.js",
-  "repository": "https://github.com/sumoncse19/mongoose-starter.git",
+  "repository": "https://github.com/sumoncse19/core-service-aoi",
   "author": "sumoncse19 <sumoncse19@gmail.com>",
   "license": "MIT",
   "scripts": {
