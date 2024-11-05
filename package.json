@@ -10,7 +10,7 @@
     "start": "node ./dist/server.js",
     "start:prod": "nodemon ./dist/server.js",
     "start:dev": "ts-node-dev --respawn --transpile-only src/server",
-    "build": "rimraf dist && tsc",
+    "build": "rm -rf dist && tsc",
     "lint": "npx eslint .",
     "lint:fix": "npx eslint . --fix",
     "prettier": "prettier --ignore-path .gitignore --write \"./src/**/*.+(js|ts|json)\"",
