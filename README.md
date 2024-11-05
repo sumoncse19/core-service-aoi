@@ -33,23 +33,23 @@ Pulikids is an innovative childcare management platform tailored for nurseries, 
 
 ## **Project Overview**
 
-Pulikids provides childcare providers with powerful tools for managing activities, ensuring compliance, and staying connected with parents. Designed with scalability and flexibility in mind, Pulikids is adaptable to various childcare environments.
+Pulikids provides childcare providers with powerful tools for managing activities, ensuring compliance, and staying connected with parents. Designed with scalability and flexibility in mind, Pulikids is adaptable to various childcare environments. The platform supports multiple user roles, including administrators, staff, and parents, each with specific functionalities tailored to their needs.
 
 ---
 
 ## **Technical Stack**
 
-- **Backend**: Node.js with TypeScript
+- **Backend**: Node.js with TypeScript for a robust and scalable server-side application.
 - **Databases**:
-  - **PostgreSQL** for structured data
-  - **MongoDB** for flexible document storage
-- **Authentication**: Clerk
-- **Validation**: Zod
+  - **PostgreSQL** for structured data storage, ensuring data integrity and complex querying capabilities.
+  - **MongoDB** for flexible document storage, allowing for dynamic and unstructured data handling.
+- **Authentication**: Clerk for secure and efficient user authentication and management.
+- **Validation**: Zod for runtime schema validation, ensuring data consistency and integrity.
 - **ORM/ODM**:
-  - TypeORM for PostgreSQL
-  - Mongoose for MongoDB
-- **API Documentation**: Swagger
-- **Email Service**: Nodemailer
+  - TypeORM for PostgreSQL, providing a powerful and flexible ORM for database interactions.
+  - Mongoose for MongoDB, offering a straightforward ODM for managing MongoDB collections.
+- **API Documentation**: Swagger for comprehensive and interactive API documentation.
+- **Email Service**: Nodemailer for reliable email communication and notifications.
 
 ---
 
@@ -57,19 +57,19 @@ Pulikids provides childcare providers with powerful tools for managing activitie
 
 ### **Technical Requirements**
 
-- Implementation in **Node.js** and **TypeScript**
-- Dual database architecture
-- Schema validation using **Zod**
-- **Clerk** for authentication
-- Optional Docker support
-- Optional Redis for API Gateway
+- Implementation in **Node.js** and **TypeScript** to leverage modern JavaScript features and type safety.
+- Dual database architecture to handle both structured and unstructured data efficiently.
+- Schema validation using **Zod** to ensure data integrity and prevent invalid data entry.
+- **Clerk** for authentication to provide secure and scalable user management.
+- Optional Docker support for containerized deployment and environment consistency.
+- Optional Redis for API Gateway to enhance performance through caching and load balancing.
 
 ### **Architecture Requirements**
 
-- **MVC** (Model-View-Controller) pattern
-- Robust error handling and input validation
-- **API Documentation**
-- Security best practices
+- **MVC** (Model-View-Controller) pattern to separate concerns and improve code maintainability.
+- Robust error handling and input validation to ensure system reliability and security.
+- **API Documentation** to provide clear and accessible information for developers.
+- Security best practices to protect user data and prevent unauthorized access.
 
 ---
 
@@ -77,20 +77,24 @@ Pulikids provides childcare providers with powerful tools for managing activitie
 
 1. **Clone the Repository**
 
+   Clone the project repository to your local machine using the following command:
+
    ```bash
    git clone https://github.com/sumoncse19/core-service-aoi
    ```
 
 2. **Install Dependencies**
 
+   Navigate to the project directory and install the necessary dependencies using Yarn or npm:
+
    ```bash
-   npm install or yarn install
+   yarn install
+   # or
+   npm install
    ```
 
 3. **Set Up Environment**  
-   Configure `.env` file with necessary variables (PostgreSQL, MongoDB, Clerk keys, etc.).
-
-   **Prerequisites**
+   Configure the `.env` file with necessary variables for PostgreSQL, MongoDB, Clerk keys, etc. Ensure you have the following prerequisites installed:
 
    - Node.js (v14 or higher)
    - PostgreSQL
@@ -99,19 +103,18 @@ Pulikids provides childcare providers with powerful tools for managing activitie
 
    ### **Environment Variables**
 
-   Required environment variables (from .env.example):
+   Copy the `.env.example` to `.env` and fill in the required values:
 
-   ````plaintext
+   ```plaintext
    # Server Configuration
-
    NODE_ENV=development
    PORT=5000
    BCRYPT_SALT_ROUNDS=12
-   JWT_ACCESS_SECRET=node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-   JWT_REFRESH_SECRET=node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+   JWT_ACCESS_SECRET=your_jwt_access_secret
+   JWT_REFRESH_SECRET=your_jwt_refresh_secret
    JWT_ACCESS_EXPIRES_IN=7d
    JWT_REFRESH_EXPIRES_IN=15m
-
+  
    For create JWT_ACCESS_SECRET and JWT_REFRESH_SECRET run this command in terminal:
 
    ```bash
@@ -142,35 +145,39 @@ Pulikids provides childcare providers with powerful tools for managing activitie
    REDIS_PORT=6379
    GATEWAY_PORT=3000
    SERVICE_REGISTRY_TTL=30
-
-   ````
+   ```
 
 4. **Database Setup**
+
+   Generate and run TypeORM migrations to set up the database schema:
 
    ```bash
    # Generate TypeORM migrations
    yarn migration:generate
-   or,
+   # or
    npm run migration:generate
 
-   # Run migrations
    yarn migration:run
-   or,
+   # or
    npm run migration:run
    ```
 
 5. **Start Development Server**
 
-   ```bash
-   # Start with hot-reload
-   yarn start:dev
-   or,
-   npm run start:dev
+   Start the development server with hot-reload capabilities:
 
-   # Build and start production server
+   ```bash
+   yarn start:dev
+   # or
+   npm run start:dev
+   ```
+
+   For production, build and start the server:
+
+   ```bash
    yarn build
    yarn start:prod
-   or,
+   # or
    npm run build
    npm run start:prod
    ```
@@ -179,12 +186,12 @@ Pulikids provides childcare providers with powerful tools for managing activitie
 
 ## **Scripts**
 
-- **`yarn start:dev` or `npm run start:dev`** - Run development server
-- **`yarn build` or `npm run build`** - Build production-ready code
-- **`yarn lint` or `npm run lint`** - Run ESLint
-- **`yarn prettier` or `npm run prettier`** - Format code
-- **`yarn migration:generate` or `npm run migration:generate`** - Generate TypeORM migrations
-- **`yarn migration:run` or `npm run migration:run`** - Execute migrations
+- **`yarn start:dev` or `npm run start:dev`** - Run the development server with hot-reload.
+- **`yarn build` or `npm run build`** - Build the application for production.
+- **`yarn lint` or `npm run lint`** - Run ESLint to check for code quality issues.
+- **`yarn prettier` or `npm run prettier`** - Format code using Prettier.
+- **`yarn migration:generate` or `npm run migration:generate`** - Generate new TypeORM migrations.
+- **`yarn migration:run` or `npm run migration:run`** - Execute database migrations.
 
 ## **API Documentation Link**
 
@@ -193,6 +200,8 @@ For detailed API documentation, visit [Swagger UI](http://localhost:5000/api-doc
 ---
 
 ## **Folder Structure**
+
+The project is organized into the following structure:
 
 ```
 src/
