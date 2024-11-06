@@ -9,8 +9,8 @@ We welcome contributions from the community! Whether you're fixing a bug, adding
 2. **Clone the Repository**: Clone the forked repository to your local machine.
 
    ```bash
-   git clone https://github.com/your-username/mongoose-starter.git
-   cd mongoose-starter
+   git clone https://github.com/sumoncse19/core-service-aoi
+   cd core-service-aoi
    ```
 
 3. **Create a New Branch**: Create a new branch for your changes.
@@ -30,7 +30,7 @@ We welcome contributions from the community! Whether you're fixing a bug, adding
 6. **Commit Your Changes**: Commit your changes with a descriptive commit message.
 
    ```bash
-   git commit -m "Add feature X"
+   git add . && git commit -m "Add feature X"
    ```
 
 7. **Push Your Branch**: Push your branch to your forked repository.
