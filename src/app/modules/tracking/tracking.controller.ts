@@ -2,6 +2,7 @@ import { Request, Response } from 'express'
 import { TrackingService } from './tracking.service'
 import catchAsync from '../../utils/catchAsync'
 import { AuthRequest } from '../../types/express'
+import AppError from '../shared/errors/AppError'
 
 export class TrackingController {
   private trackingService: TrackingService
@@ -12,10 +13,48 @@ export class TrackingController {
 
   /**
    * @swagger
+   * /tracking/activities/upcoming:
+   *   get:
+   *     summary: Get upcoming activities
+   *     tags: [Tracking]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: query
+   *         name: days
+   *         schema:
+   *           type: integer
+   *           minimum: 1
+   *           maximum: 30
+   *         description: "Number of days to look ahead (default: 7)"
+   *     responses:
+   *       200:
+   *         description: List of upcoming activities
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items:
+   *                 $ref: '#/components/schemas/Activity'
+   *       401:
+   *         description: Unauthorized
+   */
+  getUpcomingActivities = catchAsync(async (req: Request, res: Response) => {
+    const days = parseInt(req.query.days as string) || 7
+    const activities = await this.trackingService.getUpcomingActivities(days)
+
+    res.status(200).json({
+      success: true,
+      data: activities,
+    })
+  })
+
+  /**
+   * @swagger
    * /tracking/activities:
    *   post:
    *     summary: Create a new activity
-   *     tags: [Activities]
+   *     tags: [Tracking]
    *     security:
    *       - bearerAuth: []
    *     requestBody:
@@ -23,58 +62,57 @@ export class TrackingController {
    *       content:
    *         application/json:
    *           schema:
-   *             type: object
-   *             properties:
-   *               title:
-   *                 type: string
-   *               description:
-   *                 type: string
-   *               start_time:
-   *                 type: string
-   *                 format: date-time
-   *               end_time:
-   *                 type: string
-   *                 format: date-time
-   *               assigned_staff:
-   *                 type: array
-   *                 items:
-   *                   type: string
-   *               max_participants:
-   *                 type: integer
-   *               location:
-   *                 type: string
-   *               metadata:
-   *                 type: object
+   *             $ref: '#/components/schemas/ActivityInput'
    *     responses:
    *       201:
    *         description: Activity created successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Activity'
    *       400:
    *         description: Bad request
+   *       401:
+   *         description: Unauthorized
    */
-  createActivity = catchAsync(async (req: Request, res: Response) => {
-    const authReq = req as AuthRequest
-    const activity = await this.trackingService.createActivity({
-      ...req.body,
-      created_by: authReq.auth?.userId,
-    })
+  createActivity = catchAsync(
+    async (req: Request | AuthRequest, res: Response) => {
+      const authReq = req as AuthRequest
+      if (!authReq.auth?.userId) {
+        throw new AppError(401, 'Authentication required')
+      }
 
-    res.status(201).json({
-      success: true,
-      data: activity,
-    })
-  })
+      const activity = await this.trackingService.createActivity({
+        ...req.body,
+        created_by: authReq.auth.userId,
+      })
+
+      res.status(201).json({
+        success: true,
+        data: activity,
+      })
+    },
+  )
 
   /**
    * @swagger
    * /tracking/activities:
    *   get:
    *     summary: Get all activities
-   *     tags: [Activities]
+   *     tags: [Tracking]
    *     security:
    *       - bearerAuth: []
    *     responses:
    *       200:
    *         description: List of activities
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items:
+   *                 $ref: '#/components/schemas/Activity'
+   *       401:
+   *         description: Unauthorized
    */
   getActivities = catchAsync(async (req: Request, res: Response) => {
     const activities = await this.trackingService.getActivities()
@@ -90,7 +128,7 @@ export class TrackingController {
    * /tracking/activities/{id}:
    *   get:
    *     summary: Get activity by ID
-   *     tags: [Activities]
+   *     tags: [Tracking]
    *     security:
    *       - bearerAuth: []
    *     parameters:
@@ -103,6 +141,12 @@ export class TrackingController {
    *     responses:
    *       200:
    *         description: Activity details
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Activity'
+   *       401:
+   *         description: Unauthorized
    *       404:
    *         description: Activity not found
    */
@@ -120,7 +164,7 @@ export class TrackingController {
    * /tracking/activities/{id}:
    *   patch:
    *     summary: Update activity
-   *     tags: [Activities]
+   *     tags: [Tracking]
    *     security:
    *       - bearerAuth: []
    *     parameters:
@@ -135,33 +179,18 @@ export class TrackingController {
    *       content:
    *         application/json:
    *           schema:
-   *             type: object
-   *             properties:
-   *               title:
-   *                 type: string
-   *               description:
-   *                 type: string
-   *               start_time:
-   *                 type: string
-   *                 format: date-time
-   *               end_time:
-   *                 type: string
-   *                 format: date-time
-   *               assigned_staff:
-   *                 type: array
-   *                 items:
-   *                   type: string
-   *               max_participants:
-   *                 type: integer
-   *               location:
-   *                 type: string
-   *               metadata:
-   *                 type: object
+   *             $ref: '#/components/schemas/ActivityInput'
    *     responses:
    *       200:
    *         description: Activity updated successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Activity'
    *       400:
    *         description: Bad request
+   *       401:
+   *         description: Unauthorized
    *       404:
    *         description: Activity not found
    */
@@ -182,7 +211,7 @@ export class TrackingController {
    * /tracking/activities/{id}:
    *   delete:
    *     summary: Delete activity
-   *     tags: [Activities]
+   *     tags: [Tracking]
    *     security:
    *       - bearerAuth: []
    *     parameters:
@@ -195,6 +224,12 @@ export class TrackingController {
    *     responses:
    *       200:
    *         description: Activity deleted successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Activity'
+   *       401:
+   *         description: Unauthorized
    *       404:
    *         description: Activity not found
    */
@@ -212,7 +247,7 @@ export class TrackingController {
    * /tracking/attendance:
    *   post:
    *     summary: Record attendance
-   *     tags: [Attendance]
+   *     tags: [Tracking]
    *     security:
    *       - bearerAuth: []
    *     requestBody:
@@ -220,48 +255,44 @@ export class TrackingController {
    *       content:
    *         application/json:
    *           schema:
-   *             type: object
-   *             properties:
-   *               activity_id:
-   *                 type: string
-   *               child_id:
-   *                 type: string
-   *               status:
-   *                 type: string
-   *                 enum: [present, absent, late, excused]
-   *               check_in_time:
-   *                 type: string
-   *                 format: date-time
-   *               check_out_time:
-   *                 type: string
-   *                 format: date-time
-   *               notes:
-   *                 type: string
+   *             $ref: '#/components/schemas/AttendanceInput'
    *     responses:
    *       201:
    *         description: Attendance recorded successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Attendance'
    *       400:
    *         description: Bad request
+   *       401:
+   *         description: Unauthorized
    */
-  recordAttendance = catchAsync(async (req: Request, res: Response) => {
-    const authReq = req as AuthRequest
-    const attendance = await this.trackingService.recordAttendance({
-      ...req.body,
-      recorded_by: authReq.auth?.userId,
-    })
+  recordAttendance = catchAsync(
+    async (req: Request | AuthRequest, res: Response) => {
+      const authReq = req as AuthRequest
+      if (!authReq.auth?.userId) {
+        throw new AppError(401, 'Authentication required')
+      }
 
-    res.status(201).json({
-      success: true,
-      data: attendance,
-    })
-  })
+      const attendance = await this.trackingService.recordAttendance({
+        ...req.body,
+        recorded_by: authReq.auth.userId,
+      })
+
+      res.status(201).json({
+        success: true,
+        data: attendance,
+      })
+    },
+  )
 
   /**
    * @swagger
    * /tracking/attendance/activity/{activityId}:
    *   get:
    *     summary: Get attendance by activity
-   *     tags: [Attendance]
+   *     tags: [Tracking]
    *     security:
    *       - bearerAuth: []
    *     parameters:
@@ -274,6 +305,14 @@ export class TrackingController {
    *     responses:
    *       200:
    *         description: List of attendance records
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items:
+   *                 $ref: '#/components/schemas/Attendance'
+   *       401:
+   *         description: Unauthorized
    *       404:
    *         description: Activity not found
    */
@@ -293,7 +332,7 @@ export class TrackingController {
    * /tracking/reports/activity/{activityId}:
    *   get:
    *     summary: Get activity report
-   *     tags: [Reports]
+   *     tags: [Tracking]
    *     security:
    *       - bearerAuth: []
    *     parameters:
@@ -306,6 +345,12 @@ export class TrackingController {
    *     responses:
    *       200:
    *         description: Activity report
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/ActivityReport'
+   *       401:
+   *         description: Unauthorized
    *       404:
    *         description: Activity not found
    */
@@ -325,12 +370,18 @@ export class TrackingController {
    * /tracking/reports/daily:
    *   get:
    *     summary: Get daily report
-   *     tags: [Reports]
+   *     tags: [Tracking]
    *     security:
    *       - bearerAuth: []
    *     responses:
    *       200:
    *         description: Daily report
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/DailyReport'
+   *       401:
+   *         description: Unauthorized
    */
   getDailyReport = catchAsync(async (req: Request, res: Response) => {
     const report = await this.trackingService.getDailyReport()
@@ -346,7 +397,7 @@ export class TrackingController {
    * /tracking/attendance/{id}:
    *   patch:
    *     summary: Update attendance record
-   *     tags: [Attendance]
+   *     tags: [Tracking]
    *     security:
    *       - bearerAuth: []
    *     parameters:
@@ -361,49 +412,49 @@ export class TrackingController {
    *       content:
    *         application/json:
    *           schema:
-   *             type: object
-   *             properties:
-   *               status:
-   *                 type: string
-   *                 enum: [present, absent, late, excused]
-   *               check_in_time:
-   *                 type: string
-   *                 format: date-time
-   *               check_out_time:
-   *                 type: string
-   *                 format: date-time
-   *               notes:
-   *                 type: string
+   *             $ref: '#/components/schemas/AttendanceInput'
    *     responses:
    *       200:
    *         description: Attendance updated successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Attendance'
    *       400:
    *         description: Bad request
+   *       401:
+   *         description: Unauthorized
    *       404:
    *         description: Attendance record not found
    */
-  updateAttendance = catchAsync(async (req: Request, res: Response) => {
-    const authReq = req as AuthRequest
-    const attendance = await this.trackingService.updateAttendance(
-      req.params.id,
-      {
-        ...req.body,
-        recorded_by: authReq.auth?.userId,
-      },
-    )
+  updateAttendance = catchAsync(
+    async (req: Request | AuthRequest, res: Response) => {
+      const authReq = req as AuthRequest
+      if (!authReq.auth?.userId) {
+        throw new AppError(401, 'Authentication required')
+      }
 
-    res.status(200).json({
-      success: true,
-      data: attendance,
-    })
-  })
+      const attendance = await this.trackingService.updateAttendance(
+        req.params.id,
+        {
+          ...req.body,
+          recorded_by: authReq.auth.userId,
+        },
+      )
+
+      res.status(200).json({
+        success: true,
+        data: attendance,
+      })
+    },
+  )
 
   /**
    * @swagger
    * /tracking/attendance/bulk:
    *   post:
    *     summary: Record attendance for multiple children
-   *     tags: [Attendance]
+   *     tags: [Tracking]
    *     security:
    *       - bearerAuth: []
    *     requestBody:
@@ -411,20 +462,18 @@ export class TrackingController {
    *       content:
    *         application/json:
    *           schema:
-   *             type: object
-   *             properties:
-   *               activity_id:
-   *                 type: string
-   *               attendances:
-   *                 type: array
-   *                 items:
-   *                   type: object
-   *                   properties:
-   *                     child_id:
-   *                       type: string
-   *                     status:
-   *                       type: string
-   *                       enum: [present, absent, late, excused]
+   *             $ref: '#/components/schemas/BulkAttendanceInput'
+   *     responses:
+   *       201:
+   *         description: Attendance recorded successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/BulkAttendance'
+   *       400:
+   *         description: Bad request
+   *       401:
+   *         description: Unauthorized
    */
   recordBulkAttendance = catchAsync(async (req: Request, res: Response) => {
     const { activity_id, attendances } = req.body
@@ -441,35 +490,10 @@ export class TrackingController {
 
   /**
    * @swagger
-   * /tracking/activities/upcoming:
-   *   get:
-   *     summary: Get upcoming activities
-   *     tags: [Activities]
-   *     security:
-   *       - bearerAuth: []
-   *     parameters:
-   *       - in: query
-   *         name: days
-   *         schema:
-   *           type: number
-   *         description: Number of days to look ahead (default: 7)
-   */
-  getUpcomingActivities = catchAsync(async (req: Request, res: Response) => {
-    const days = req.query.days ? parseInt(req.query.days as string) : 7
-    const activities = await this.trackingService.getUpcomingActivities(days)
-
-    res.status(200).json({
-      success: true,
-      data: activities,
-    })
-  })
-
-  /**
-   * @swagger
    * /tracking/reports/weekly:
    *   get:
    *     summary: Get weekly activity report
-   *     tags: [Reports]
+   *     tags: [Tracking]
    *     security:
    *       - bearerAuth: []
    *     parameters:
@@ -479,6 +503,15 @@ export class TrackingController {
    *           type: string
    *           format: date
    *         description: Start date of the week
+   *     responses:
+   *       200:
+   *         description: Weekly activity report
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/WeeklyReport'
+   *       401:
+   *         description: Unauthorized
    */
   getWeeklyReport = catchAsync(async (req: Request, res: Response) => {
     const startDate = req.query.startDate
@@ -497,7 +530,7 @@ export class TrackingController {
    * /tracking/reports/monthly:
    *   get:
    *     summary: Get monthly activity report
-   *     tags: [Reports]
+   *     tags: [Tracking]
    *     security:
    *       - bearerAuth: []
    *     parameters:
@@ -511,6 +544,15 @@ export class TrackingController {
    *         required: true
    *         schema:
    *           type: number
+   *     responses:
+   *       200:
+   *         description: Monthly activity report
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/MonthlyReport'
+   *       401:
+   *         description: Unauthorized
    */
   getMonthlyReport = catchAsync(async (req: Request, res: Response) => {
     const { year, month } = req.query
